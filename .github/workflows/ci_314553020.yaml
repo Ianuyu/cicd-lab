@@ -40,6 +40,17 @@ jobs:
       - name: Prettier check
         run: npm run format:check
 
+      - name: Prettier failure summary
+        if: failure()
+        run: |
+          {
+            echo "## Prettier Check Failed"
+            echo ""
+            echo "- Failed command: \`npm run format:check\`"
+            echo "- Cause: Some files do not match Prettier formatting rules."
+            echo "- Fix: Run \`npm run format\`, commit the changes, and push again."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Test
         run: npm test
 
