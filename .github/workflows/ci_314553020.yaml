@@ -60,18 +60,28 @@ jobs:
 
       - name: Prettier check
         id: prettier
-        run: npm run format:check
-
-      - name: Prettier failure summary
-        if: ${{ failure() && steps.prettier.outcome == 'failure' }}
+        shell: bash
         run: |
-          {
-            echo "## Prettier Check Failed"
-            echo ""
-            echo "- Failed command: \`npm run format:check\`"
-            echo "- Cause: Some files do not match Prettier formatting rules."
-            echo "- Fix: Run \`npm run format\`, commit the changes, and push again."
-          } >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          npm run format:check 2>&1 | tee prettier.log
+          status=${PIPESTATUS[0]}
+
+          if [ "$status" -ne 0 ]; then
+            {
+              echo "## Prettier Check Failed"
+              echo ""
+              echo "- Failed command: \`npm run format:check\`"
+              echo "- Cause: Some files do not match Prettier formatting rules."
+              echo "- Fix: Run \`npm run format\`, commit the changes, and push again."
+              echo ""
+              echo "### Error output"
+              echo '```text'
+              cat prettier.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          exit "$status"
 
       - name: Test
         run: npm test

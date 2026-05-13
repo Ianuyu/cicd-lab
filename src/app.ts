@@ -1,4 +1,3 @@
-const typeErrorDemo: string = 123;
 import Fastify, { FastifyServerOptions } from 'fastify';
 
 export function buildApp(options: FastifyServerOptions = {}) {
