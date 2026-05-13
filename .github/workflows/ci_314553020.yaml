@@ -35,7 +35,28 @@ jobs:
 
       # add your steps here, e.g. lint, test, build etc.
       - name: TypeScript typecheck
-        run: npm run typecheck
+        shell: bash
+        run: |
+          set +e
+          npm run typecheck 2>&1 | tee typecheck.log
+          status=${PIPESTATUS[0]}
+
+          if [ "$status" -ne 0 ]; then
+            {
+              echo "## TypeScript Typecheck Failed"
+              echo ""
+              echo "- Failed command: \`npm run typecheck\`"
+              echo "- Cause: TypeScript found a type error in the source code."
+              echo "- Fix: Correct the type mismatch, commit the changes, and push again."
+              echo ""
+              echo "### Error output"
+              echo '```text'
+              cat typecheck.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          exit "$status"
 
       - name: Prettier check
         run: npm run format:check
