@@ -36,6 +36,8 @@ jobs:
       # add your steps here, e.g. lint, test, build etc.
       - name: TypeScript typecheck
         shell: bash
+        env:
+          NO_COLOR: '1'
         run: |
           set +e
           npm run typecheck 2>&1 | tee typecheck.log
@@ -61,6 +63,8 @@ jobs:
       - name: Prettier check
         id: prettier
         shell: bash
+        env:
+          NO_COLOR: '1'
         run: |
           set +e
           npm run format:check 2>&1 | tee prettier.log
