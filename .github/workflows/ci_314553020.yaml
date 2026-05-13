@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [ '22', '24' ]
+        node-version: ['22', '24']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -88,7 +88,30 @@ jobs:
           exit "$status"
 
       - name: Test
-        run: npm test
+        shell: bash
+        env:
+          NO_COLOR: '1'
+        run: |
+          set +e
+          npm test 2>&1 | tee test.log
+          status=${PIPESTATUS[0]}
+
+          if [ "$status" -ne 0 ]; then
+            {
+              echo "## Test Failed"
+              echo ""
+              echo "- Failed command: \`npm test\`"
+              echo "- Cause: One or more tests failed."
+              echo "- Fix: Correct the implementation or test expectation, commit the changes, and push again."
+              echo ""
+              echo "### Error output"
+              echo '```text'
+              cat test.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          exit "$status"
 
       - name: Compute image tag
         id: meta
